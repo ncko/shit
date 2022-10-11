@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
-category=`cat data.json | jq 'keys[]' | tr -d \" | fzf`
-item=`cat data.json | jq ".\"$category\" | keys[]" | tr -d \" | fzf`
-cat data.json | jq ".\"$category\".\"$item\"" | tr -d \"
+url="https://raw.githubusercontent.com/ncko/shit/main/data.json"
+
+category=`curl -s $url | jq 'keys[]' | tr -d \" | fzf`
+item=`curl -s $url | jq ".\"$category\" | keys[]" | tr -d \" | fzf`
+curl -s $url | jq ".\"$category\".\"$item\"" | tr -d \"
