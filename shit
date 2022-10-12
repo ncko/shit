@@ -1,5 +1,62 @@
 #!/usr/bin/env bash
 
-category=`cat data.json | jq 'keys[]' | tr -d \" | fzf`
-item=`cat data.json | jq ".\"$category\" | keys[]" | tr -d \" | fzf`
-cat data.json | jq ".\"$category\".\"$item\"" | tr -d \"
+bold=$(tput bold)
+normal=$(tput sgr0)
+
+function check() {
+  if [ $# -eq 0 ]; then
+    get-category-and-item && print-item
+    exit 0
+  fi
+
+  local opt
+
+  while getopts ":eah" opt; do
+    case $opt in
+      e) get-category-and-item;;
+      a) echo "add an item. should take a category and item name argument";;
+      h) help;;
+      \?) help && exit 1;
+    esac
+  done
+}
+
+function help() {
+  echo "${bold}USAGE${normal}"
+  echo "  shit <command> [flags]"
+  echo ""
+  echo "${bold}SUBCOMMANDS${normal}"
+  echo "  add:    add a new shit"
+  echo "  edit:   edit an existing shit"
+  echo ""
+  echo "${bold}FLAGS${normal}"
+  echo "  --help, -h    show this message"
+  echo ""
+  echo "${bold}EXAMPLES${normal}"
+  echo "Find an existing shit"
+  echo "  $ shit"
+  echo ""
+  echo "Edit an existing shit"
+  echo "  $ shit edit"
+  echo ""
+  echo "Add a new shit"
+  echo "  $ shit add --category bash --title \"display hello world message\" --shit \"echo Hello, World!\""
+  echo ""
+  echo "Adding can also be done with short flags"
+  echo "  $ shit add -c bash -t \"display hello world message\" -s \"echo Hello, World!\""
+  echo ""
+  echo "${bold}FEEDBACK${normal}"
+  echo "Open an issue at github.com/ncko/shit"
+  echo ""
+}
+
+function get-category-and-item() {
+  category=`cat data.json | jq 'keys[]' | tr -d \" | fzf`
+  item=`cat data.json | jq --arg c $category '.[$c] | keys[]' | tr -d \" | fzf`
+}
+
+function print-item() {
+  cat data.json | jq --arg c "$category" --arg i "$item" '.[$c][$i]' | tr -d \"
+}
+
+check $@
