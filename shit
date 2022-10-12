@@ -5,17 +5,24 @@ normal=$(tput sgr0)
 
 function check() {
   if [ $# -eq 0 ]; then
-    get-category-and-item && print-item
+    local category_item=`get-category-and-item`
+    local category=`echo $category_item | cut -d % -f 1`
+    local item=`echo $category_item | cut -d % -f 2`
+    print-item "$category" "$item"
     exit 0
   fi
 
   case $1 in
     add) echo "adding!";;
-    edit) echo "editing!";;
+    edit) edit;;
     -h) help;;
     --help) help;;
     \?) help && exit 1;
   esac
+}
+
+function edit() {
+  echo "editing"
 }
 
 function help() {
@@ -48,12 +55,13 @@ function help() {
 }
 
 function get-category-and-item() {
-  category=`cat data.json | jq 'keys[]' | tr -d \" | fzf`
-  item=`cat data.json | jq --arg c $category '.[$c] | keys[]' | tr -d \" | fzf`
+  local category=`cat data.json | jq 'keys[]' | tr -d \" | fzf`
+  local item=`cat data.json | jq --arg c $category '.[$c] | keys[]' | tr -d \" | fzf`
+  echo $category%$item
 }
 
 function print-item() {
-  cat data.json | jq --arg c "$category" --arg i "$item" '.[$c][$i]' | tr -d \"
+  cat data.json | jq --arg c "$1" --arg i "$2" '.[$c][$i]' | tr -d \"
 }
 
 check $@
