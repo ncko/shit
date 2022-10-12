@@ -27,7 +27,7 @@ function edit() {
   local item=`echo $category_item | cut -d % -f 2`
 
   tmp=$(mktemp)
-  cat data.json | jq --arg c "$category" --arg i "$item" '.[$c][$i]' | sed -e 's/^"//' -e 's/"$//' > $tmp
+  cat data.json | jq --raw-output --arg c "$category" --arg i "$item" '.[$c][$i]' | sed -e 's/^"//' -e 's/"$//' > $tmp
   vim $tmp
 
   cat data.json | jq --arg c "$category" --arg i "$item" --arg update "$(cat $tmp)" '.[$c][$i] = $update' > data.json
@@ -73,7 +73,7 @@ function get-category-and-item() {
 }
 
 function print-item() {
-  cat data.json | jq --arg c "$1" --arg i "$2" '.[$c][$i]' | tr -d \"
+  cat data.json | jq --raw-output --arg c "$1" --arg i "$2" '.[$c][$i]' | tr -d \"
 }
 
 check $@
