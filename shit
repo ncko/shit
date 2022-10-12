@@ -13,7 +13,7 @@ function check() {
   fi
 
   case $1 in
-    add) echo "adding!";;
+    add) add;;
     edit) edit;;
     -h) help;;
     --help) help;;
@@ -22,7 +22,19 @@ function check() {
 }
 
 function edit() {
-  echo "editing"
+  local category_item=`get-category-and-item`
+  local category=`echo $category_item | cut -d % -f 1`
+  local item=`echo $category_item | cut -d % -f 2`
+
+  tmp=$(mktemp)
+  cat data.json | jq --arg c "$category" --arg i "$item" '.[$c][$i]' | sed -e 's/^"//' -e 's/"$//' > $tmp
+  vim $tmp
+
+  cat data.json | jq --arg c "$category" --arg i "$item" --arg update "$(cat $tmp)" '.[$c][$i] = $update' > data.json
+}
+
+function add() {
+  echo "adding"
 }
 
 function help() {
