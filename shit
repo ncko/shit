@@ -9,16 +9,13 @@ function check() {
     exit 0
   fi
 
-  local opt
-
-  while getopts ":eah" opt; do
-    case $opt in
-      e) get-category-and-item;;
-      a) echo "add an item. should take a category and item name argument";;
-      h) help;;
-      \?) help && exit 1;
-    esac
-  done
+  case $1 in
+    add) echo "adding!";;
+    edit) echo "editing!";;
+    -h) help;;
+    --help) help;;
+    \?) help && exit 1;
+  esac
 }
 
 function help() {
