@@ -1,12 +1,12 @@
 {
   "aws-cli": {
-    "Get an item from dynamodb": "aws dynamodb get-item --table-name=$(aws dynamodb list-tables | jq \".TableNames[]\" | tr -d \\\" | fzf) --key='{ \"path\": { \"S\": \"/hello\" } }'",
-    "Listen to log events by log group": "aws logs tail $(aws logs describe-log-groups | jq \".logGroups[].logGroupName\" | tr -d \\\" | fzf) --follow"
+    "dynamodb: get an item": "aws dynamodb get-item --table-name=$(aws dynamodb list-tables | jq \".TableNames[]\" | tr -d \\\" | fzf) --key='{ \"path\": { \"S\": \"/hello\" } }'",
+    "logs: get events by log group": "aws logs tail $(aws logs describe-log-groups | jq \".logGroups[].logGroupName\" | tr -d \\\" | fzf) --follow"
   },
   "tmux": {
-    "Kill tmux sessions by name": "tmux kill-session -t $(tmux list-sessions | awk '{print $1}' | tr -d : | fzf"
+    "sessions: kill session by name": "tmux kill-session -t $(tmux list-sessions | awk '{print $1}' | tr -d : | fzf"
   },
   "gh": {
-    "create a private repo from current directory": "gh repo create <project_name> --private --source=. --remote=upstream"
+    "repo: create a private repo from current directory": "gh repo create <project_name> --private --source=. --remote=upstream"
   }
 }
