@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+shit_file="$HOME/.local/share/shit/shits.json"
+
 bold=$(tput bold)
 normal=$(tput sgr0)
 
@@ -27,10 +29,10 @@ function edit() {
   local item=`echo $category_item | cut -d % -f 2`
 
   tmp=$(mktemp)
-  cat data.json | jq --raw-output --arg c "$category" --arg i "$item" '.[$c][$i]' | sed -e 's/^"//' -e 's/"$//' > $tmp
+  cat $shit_file | jq --raw-output --arg c "$category" --arg i "$item" '.[$c][$i]' | sed -e 's/^"//' -e 's/"$//' > $tmp
   vim $tmp
 
-  cat data.json | jq --arg c "$category" --arg i "$item" --arg update "$(cat $tmp)" '.[$c][$i] = $update' > data.json
+  cat $shit_file | jq --arg c "$category" --arg i "$item" --arg update "$(cat $tmp)" '.[$c][$i] = $update' > $shit_file
 }
 
 function add() {
@@ -53,8 +55,8 @@ function add() {
 
   shit=$(cat $tmp)
 
-  new_data=$(cat data.json | jq --arg c "$category" --arg i "$item" --arg s "$shit" '.[$c][$i] = $s')
-  echo "$new_data" > data.json
+  new_data=$(cat $shit_file | jq --arg c "$category" --arg i "$item" --arg s "$shit" '.[$c][$i] = $s')
+  echo "$new_data" > $shit_file
 }
 
 function help() {
@@ -87,13 +89,13 @@ function help() {
 }
 
 function get-category-and-item() {
-  local category=`cat data.json | jq 'keys[]' | tr -d \" | fzf`
-  local item=`cat data.json | jq --arg c $category '.[$c] | keys[]' | tr -d \" | fzf`
+  local category=`cat $shit_file | jq 'keys[]' | tr -d \" | fzf`
+  local item=`cat $shit_file | jq --arg c $category '.[$c] | keys[]' | tr -d \" | fzf`
   echo $category%$item
 }
 
 function print-item() {
-  cat data.json | jq --raw-output --arg c "$1" --arg i "$2" '.[$c][$i]' | tr -d \"
+  cat $shit_file | jq --raw-output --arg c "$1" --arg i "$2" '.[$c][$i]' | tr -d \"
 }
 
 check "$@"
