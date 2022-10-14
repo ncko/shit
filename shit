@@ -38,8 +38,6 @@ function edit() {
 }
 
 function add() {
-  #local args=`getopt c:i: $*`
-
   while getopts "c:i:" option
   do
     case "${option}" in
@@ -57,7 +55,7 @@ function add() {
 
   shit=$(cat $tmp)
 
-  new_data=$(cat $shit_file | jq --arg c "$category" --arg i "$item" --arg s "$shit" '.[$c][$i] = $s')
+  new_data=$(cat $shit_file | jq --arg c "$category" --arg i "$item" --arg s "$shit" '.[$c][$i] = "$s"')
   echo "$new_data" > $shit_file
 }
 
@@ -101,13 +99,17 @@ function help() {
 }
 
 function get-category-and-item() {
-  local category=`cat $shit_file | jq 'keys[]' | tr -d \" | fzf`
-  local item=`cat $shit_file | jq --arg c $category '.[$c] | keys[]' | tr -d \" | fzf`
+  local category=`cat $shit_file | jq 'keys[]' | trim_quotes | fzf`
+  local item=`cat $shit_file | jq --arg c $category '.[$c] | keys[]' | trim_quotes | fzf`
   echo $category%$item
 }
 
 function print-item() {
-  cat $shit_file | jq --raw-output --arg c "$1" --arg i "$2" '.[$c][$i]' | tr -d \"
+  cat $shit_file | jq --raw-output --arg c "$1" --arg i "$2" '.[$c][$i]'
+}
+
+trim_quotes() {
+  sed 's/^"//;s/"$//'
 }
 
 check "$@"
