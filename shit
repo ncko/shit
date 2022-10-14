@@ -19,6 +19,8 @@ function check() {
     add) shift && add "$@";;
     edit) edit;;
     delete) delete;;
+    dump) dump;;
+    direct) direct;;
     -h) help;;
     --help) help;;
     \?) help && exit 1;
@@ -55,7 +57,7 @@ function add() {
 
   shit=$(cat $tmp)
 
-  new_data=$(cat $shit_file | jq --arg c "$category" --arg i "$item" --arg s "$shit" '.[$c][$i] = "$s"')
+  new_data=$(cat $shit_file | jq --arg c "$category" --arg i "$item" --arg s "$shit" '.[$c][$i] = $s')
   echo "$new_data" > $shit_file
 }
 
@@ -72,10 +74,12 @@ function help() {
   echo "${bold}USAGE${normal}"
   echo "  shit <command> [flags]"
   echo ""
-  echo "${bold}SUBCOMMANDS${normal}"
+  echo "${bold}COMMANDS${normal}"
   echo "  add:    add a new shit"
   echo "  delete: delete an existing shit"
   echo "  edit:   edit an existing shit"
+  echo "  dump:   print shits file"
+  echo "  direct: open shits file directly"
   echo ""
   echo "${bold}FLAGS${normal}"
   echo "  --help, -h    show this message"
@@ -96,6 +100,14 @@ function help() {
     echo "${bold}FEEDBACK${normal}"
   echo "Open an issue at github.com/ncko/shit"
   echo ""
+}
+
+function dump() {
+  cat $shit_file | jq .
+}
+
+function direct() {
+  vim $shit_file
 }
 
 function get-category-and-item() {
