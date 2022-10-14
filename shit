@@ -13,7 +13,7 @@ function check() {
   fi
 
   case $1 in
-    add) add;;
+    add) shift && add "$@";;
     edit) edit;;
     -h) help;;
     --help) help;;
@@ -34,7 +34,27 @@ function edit() {
 }
 
 function add() {
-  echo "adding"
+  #local args=`getopt c:i: $*`
+
+  while getopts "c:i:" option
+  do
+    case "${option}" in
+      c)
+        local category="${OPTARG}"
+        ;;
+      i)
+        local item="${OPTARG}"
+        ;;
+    esac
+  done
+
+  tmp=$(mktemp)
+  vim $tmp
+
+  shit=$(cat $tmp)
+
+  new_data=$(cat data.json | jq --arg c "$category" --arg i "$item" --arg s "$shit" '.[$c][$i] = $s')
+  echo "$new_data" > data.json
 }
 
 function help() {
@@ -76,4 +96,4 @@ function print-item() {
   cat data.json | jq --raw-output --arg c "$1" --arg i "$2" '.[$c][$i]' | tr -d \"
 }
 
-check $@
+check "$@"
