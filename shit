@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-shit_file="$HOME/.local/share/shit/shits.json"
+#shit_file="$HOME/.local/share/shit/shits.json"
+shit_file="./data.json"
 
 bold=$(tput bold)
 normal=$(tput sgr0)
@@ -17,6 +18,7 @@ function check() {
   case $1 in
     add) shift && add "$@";;
     edit) edit;;
+    delete) delete;;
     -h) help;;
     --help) help;;
     \?) help && exit 1;
@@ -59,12 +61,22 @@ function add() {
   echo "$new_data" > $shit_file
 }
 
+function delete() {
+  local category_item=`get-category-and-item`
+  local category=`echo $category_item | cut -d % -f 1`
+  local item=`echo $category_item | cut -d % -f 2`
+
+  new_data=$(cat $shit_file | jq --arg c "$category" --arg i "$item" 'del(.[$c][$i])')
+  echo "$new_data" > $shit_file
+}
+
 function help() {
   echo "${bold}USAGE${normal}"
   echo "  shit <command> [flags]"
   echo ""
   echo "${bold}SUBCOMMANDS${normal}"
   echo "  add:    add a new shit"
+  echo "  delete: delete an existing shit"
   echo "  edit:   edit an existing shit"
   echo ""
   echo "${bold}FLAGS${normal}"
@@ -74,13 +86,16 @@ function help() {
   echo "Find an existing shit"
   echo "  $ shit"
   echo ""
-  echo "Edit an existing shit"
-  echo "  $ shit edit"
-  echo ""
   echo "Add a new shit"
   echo "  $ shit add -c bash -i \"display hello world message\""
   echo ""
-  echo "${bold}FEEDBACK${normal}"
+  echo "Delete a shit"
+  echo "  $ shit delete"
+  echo ""
+  echo "Edit an existing shit"
+  echo "  $ shit edit"
+  echo ""
+    echo "${bold}FEEDBACK${normal}"
   echo "Open an issue at github.com/ncko/shit"
   echo ""
 }
