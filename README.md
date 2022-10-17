@@ -13,7 +13,7 @@ You can install these requirements using your favorite package manager (apt, hom
 ## Usage
 
 ```console
-  shit <command> [flags]
+$  shit <command> [flags]
 ```
 
 ### Commands
