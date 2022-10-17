@@ -88,7 +88,7 @@ function help() {
   echo "Find an existing shit"
   echo "  $ shit"
   echo ""
-  echo "Add a new shit"
+  echo "Add a new shit by passing it a category and item title"
   echo "  $ shit add -c bash -i \"display hello world message\""
   echo ""
   echo "Delete a shit"
