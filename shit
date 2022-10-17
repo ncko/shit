@@ -1,5 +1,127 @@
 #!/usr/bin/env bash
 
-category=`cat data.json | jq 'keys[]' | tr -d \" | fzf`
-item=`cat data.json | jq ".\"$category\" | keys[]" | tr -d \" | fzf`
-cat data.json | jq ".\"$category\".\"$item\"" | tr -d \"
+#shit_file="$HOME/.local/share/shit/shits.json"
+shit_file="./data.json"
+
+bold=$(tput bold)
+normal=$(tput sgr0)
+
+function check() {
+  if [ $# -eq 0 ]; then
+    local category_item=`get-category-and-item`
+    local category=`echo $category_item | cut -d % -f 1`
+    local item=`echo $category_item | cut -d % -f 2`
+    print-item "$category" "$item"
+    exit 0
+  fi
+
+  case $1 in
+    add) shift && add "$@";;
+    edit) edit;;
+    delete) delete;;
+    dump) dump;;
+    direct) direct;;
+    -h) help;;
+    --help) help;;
+    \?) help && exit 1;
+  esac
+}
+
+function edit() {
+  local category_item=`get-category-and-item`
+  local category=`echo $category_item | cut -d % -f 1`
+  local item=`echo $category_item | cut -d % -f 2`
+
+  tmp=$(mktemp)
+  cat $shit_file | jq --raw-output --arg c "$category" --arg i "$item" '.[$c][$i]' | sed -e 's/^"//' -e 's/"$//' > $tmp
+  vim $tmp
+
+  cat $shit_file | jq --arg c "$category" --arg i "$item" --arg update "$(cat $tmp)" '.[$c][$i] = $update' > $shit_file
+}
+
+function add() {
+  while getopts "c:i:" option
+  do
+    case "${option}" in
+      c)
+        local category="${OPTARG}"
+        ;;
+      i)
+        local item="${OPTARG}"
+        ;;
+    esac
+  done
+
+  tmp=$(mktemp)
+  vim $tmp
+
+  shit=$(cat $tmp)
+
+  new_data=$(cat $shit_file | jq --arg c "$category" --arg i "$item" --arg s "$shit" '.[$c][$i] = $s')
+  echo "$new_data" > $shit_file
+}
+
+function delete() {
+  local category_item=`get-category-and-item`
+  local category=`echo $category_item | cut -d % -f 1`
+  local item=`echo $category_item | cut -d % -f 2`
+
+  new_data=$(cat $shit_file | jq --arg c "$category" --arg i "$item" 'del(.[$c][$i])')
+  echo "$new_data" > $shit_file
+}
+
+function help() {
+  echo "${bold}USAGE${normal}"
+  echo "  shit <command> [flags]"
+  echo ""
+  echo "${bold}COMMANDS${normal}"
+  echo "  add:    add a new shit"
+  echo "  delete: delete an existing shit"
+  echo "  edit:   edit an existing shit"
+  echo "  dump:   print shits file"
+  echo "  direct: open shits file directly"
+  echo ""
+  echo "${bold}FLAGS${normal}"
+  echo "  --help, -h    show this message"
+  echo ""
+  echo "${bold}EXAMPLES${normal}"
+  echo "Find an existing shit"
+  echo "  $ shit"
+  echo ""
+  echo "Add a new shit"
+  echo "  $ shit add -c bash -i \"display hello world message\""
+  echo ""
+  echo "Delete a shit"
+  echo "  $ shit delete"
+  echo ""
+  echo "Edit an existing shit"
+  echo "  $ shit edit"
+  echo ""
+    echo "${bold}FEEDBACK${normal}"
+  echo "Open an issue at github.com/ncko/shit"
+  echo ""
+}
+
+function dump() {
+  cat $shit_file | jq .
+}
+
+function direct() {
+  vim $shit_file
+}
+
+function get-category-and-item() {
+  local category=`cat $shit_file | jq 'keys[]' | trim_quotes | fzf`
+  local item=`cat $shit_file | jq --arg c $category '.[$c] | keys[]' | trim_quotes | fzf`
+  echo $category%$item
+}
+
+function print-item() {
+  cat $shit_file | jq --raw-output --arg c "$1" --arg i "$2" '.[$c][$i]'
+}
+
+trim_quotes() {
+  sed 's/^"//;s/"$//'
+}
+
+check "$@"
