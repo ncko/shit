@@ -111,13 +111,13 @@ function direct() {
 }
 
 function get-category-and-item() {
-  local category=`cat $shit_file | jq 'keys[]' | trim_quotes | fzf`
-  local item=`cat $shit_file | jq --arg c $category '.[$c] | keys[]' | trim_quotes | fzf`
+  local category=`cat $shit_file | jq 'keys[]' | trim_quotes | fzf --reverse --tmux`
+  local item=`cat $shit_file | jq --arg c $category '.[$c] | keys[]' | trim_quotes | fzf --reverse --tmux`
   echo $category%$item
 }
 
 function print-item() {
-  cat $shit_file | jq --raw-output --arg c "$1" --arg i "$2" '.[$c][$i]'
+  cat $shit_file | jq --raw-output --arg c "$1" --arg i "$2" '.[$c][$i]' | tr -d '\n'
 }
 
 trim_quotes() {
